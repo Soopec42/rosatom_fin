@@ -1,0 +1,95 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+
+int adjustIndex(int index, int excludeIndex) {
+    if (index >= excludeIndex)
+        return index + 1;
+    else
+        return index;
+}
+
+
+long findKth(const vector<long>& arr1, const vector<long>& arr2, int k, int excludeIndex) {
+    int m = arr1.size(); 
+    int n = arr2.size(); 
+    int totalElementsInArr1 = m - 1; 
+
+    int indexA = 0, indexB = 0;
+
+    while (true) {
+        if (indexA == totalElementsInArr1)
+            return arr2[indexB + k - 1];
+        if (indexB == n) {
+            int adjustedIndexA = adjustIndex(indexA + k - 1, excludeIndex);
+            return arr1[adjustedIndexA];
+        }
+        if (k == 1) {
+            long valA = arr1[adjustIndex(indexA, excludeIndex)];
+            long valB = arr2[indexB];
+            return min(valA, valB);
+        }
+
+        int halfK = k / 2;
+
+        int newIndexA = min(indexA + halfK, totalElementsInArr1) - 1;
+        int newIndexB = min(indexB + halfK, n) - 1;
+
+        long pivotA = arr1[adjustIndex(newIndexA, excludeIndex)];
+        long pivotB = arr2[newIndexB];
+
+        if (pivotA <= pivotB) {
+            k -= (newIndexA - indexA + 1);
+            indexA = newIndexA + 1;
+        }
+        else {
+            k -= (newIndexB - indexB + 1);
+            indexB = newIndexB + 1;
+        }
+    }
+}
+
+int main() {
+    int n, m, q;
+    cin >> n >> m;
+    vector<vector<long>> vec(n, vector<long>(m));
+    vector<vector<long>> row(n), col(m);
+
+    for (int i = 0; i < n; i++) {
+        row[i].resize(m);
+        for (int j = 0; j < m; j++) {
+            cin >> vec[i][j];
+            row[i][j] = vec[i][j];
+        }
+        sort(row[i].begin(), row[i].end()); 
+    }
+
+    
+    for (int j = 0; j < m; j++) {
+        col[j].resize(n);
+        for (int i = 0; i < n; i++) {
+            col[j][i] = vec[i][j];
+        }
+        sort(col[j].begin(), col[j].end()); 
+    }
+
+    cin >> q;
+
+    for (int z = 0; z < q; z++) {
+        int i, j;
+        long k;
+        cin >> i >> j >> k;
+        
+        //2 строчки непонятно работающей залупы
+        auto it = lower_bound(row[i].begin(), row[i].end(), vec[i][j]);
+        int excludeIndex = it - row[i].begin(); 
+
+        long result = findKth(row[i], col[j], k, excludeIndex);
+        cout << result << endl;
+    }
+
+    return 0;
+}
