@@ -1,0 +1,55 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+
+int main()
+{
+
+    long long n;
+    long long p = 1e9 + 7;
+    cin >> n;
+
+    vector<vector<int>> matr(4, vector<int>(4, 0));
+
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            cin >> matr[i][j];
+        }
+    }
+
+
+    vector<vector<long long>> dp(n, vector<long long>(4, 0));
+    dp[0][0] = 1;
+    dp[0][1] = 1;
+    dp[0][2] = 1;
+    dp[0][3] = 1;
+    for (int i = 1; i < n; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            for (int b = 0; b < 4; b++)
+            {
+                if (matr[j][b] == 1)
+                {
+
+                    dp[i][j] += dp[i - 1][b] % p;
+
+                }
+
+            }
+        }
+        
+
+    }
+    long long sum = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        sum += dp[n - 1][i];
+    }
+    
+    cout << sum % p;
+}
