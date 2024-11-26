@@ -1,0 +1,155 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <algorithm>
+
+using namespace std;
+
+
+
+void minspis(vector<pair<long long, long long>> ma)
+{
+	if (ma.size() == 1)
+	{
+		cout << -1 << " " << -1 << " " << ma[0].second << endl;
+	}
+	if (ma.size() == 2)
+	{
+		cout << -1 << " " << min(ma[0].second, ma[1].second) << " " << max(ma[0].second, ma[1].second) << endl;
+	}
+	if (ma.size() >= 3)
+	{
+		long long a, b, c;
+		a = ma[0].second;
+		b = ma[1].second;
+		c = ma[2].second;
+		vector<int> vec(3);
+		vec[0] = a;
+		vec[1] = b;
+		vec[2] = c;
+		sort(vec.begin(), vec.end());
+		for (int v = 3; v < ma.size(); v++)
+		{
+			if (ma[v].second > vec[0])
+			{
+				vec[0] = ma[v].second;
+				stable_sort(vec.begin(), vec.end());
+			}
+
+		}
+		
+		cout << vec[0] << " " << vec[1] << " " << vec[2] << endl;
+	}
+}
+
+
+int main() {
+
+	int n, q;
+	cin >> n;
+	unordered_map<int, vector<pair<long long, long long>>> ma;
+
+	for (int i = 0; i < n; i++)
+	{
+		int b;
+		cin >> b;
+		pair<long long, long long> bob;
+		bob.first = i;
+		bob.second = b;
+
+		ma[i].push_back(bob);
+		
+	}
+	cin >> q;
+	for (int l = 0; l < q; l++)
+	{
+		int k;
+		cin >> k;
+		if (k == 1)
+		{
+			int d, m = 0;
+			cin >> d;
+			for (int j = 0; j < ma.size(); j++)
+			{
+				for (int k = 0; k < ma[j].size(); k++)
+				{
+					if (ma[j][k].first == d - 1)
+					{
+						ma[j].erase(ma[j].begin() + k);
+						m = 1;
+					}
+					if (m == 1)
+						break;
+				}
+				if (m == 1)
+					break;
+			}
+		}
+		if (k == 2)
+		{
+			int d, z, m = 0, fli;
+			cin >> d >> z;
+			vector<pair<long long, long long>> zap;
+			for (int j = 0; j < ma.size(); j++)
+			{
+				for (int k = 0; k < ma[j].size(); k++)
+				{
+					if (ma[j][k].first == d - 1 || ma[j][k].first == z - 1)
+					{
+						if (m == 1)
+						{
+							if (j != fli)
+							{
+								for (long long h = 0; h < zap.size(); h++)
+								{
+									ma[j].push_back(zap[h]);
+								}
+								
+								ma.erase(fli);
+							}
+							m += 1;
+							
+						}
+						if (m == 0)
+						{
+							fli = j;
+							zap = ma[j];
+							
+							m += 1;
+						}
+					
+					}
+					if (m == 2)
+						break;
+				}
+				if (m == 2)
+					break;
+			}
+		}
+		if (k == 3)
+		{
+			int d, m = 0;
+			cin >> d;
+			for (int j = 0; j < ma.size(); j++)
+			{
+				for (int k = 0; k < ma[j].size(); k++)
+				{
+					if (ma[j][k].first == d - 1)
+					{
+
+
+						minspis(ma[j]);
+						m = 1;
+					}
+					if (m == 1)
+						break;
+				}
+				if (m == 1)
+					break;
+			}
+		}
+	}
+
+
+}
