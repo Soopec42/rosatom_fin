@@ -1,0 +1,128 @@
+#include <vector>
+#include <deque>
+#include <algorithm>
+#include <iostream>
+#include <climits>
+
+using namespace std;
+
+typedef long long ll;
+
+struct Item {
+    ll color;
+    ll price;
+    int type; // 0 - sofa, 1 - table, 2 - covering
+};
+
+bool is_possible(ll D, const vector<Item>& events, ll X) {
+    int n = events.size();
+    int left = 0;
+
+    vector<deque<pair<int, ll>>> dq(3); // Для каждого типа предметов
+    vector<ll> min_price(3, LLONG_MAX);
+
+    for (int right = 0; right < n; ++right) {
+        int type = events[right].type;
+        ll price = events[right].price;
+
+        // Обновляем дек для данного типа
+        while (!dq[type].empty() && dq[type].back().second >= price) {
+            dq[type].pop_back();
+        }
+        dq[type].push_back({ right, price });
+        min_price[type] = dq[type].front().second;
+
+        // Сдвигаем левую границу окна
+        while (events[right].color - events[left].color > D) {
+            int ltype = events[left].type;
+            if (!dq[ltype].empty() && dq[ltype].front().first == left) {
+                dq[ltype].pop_front();
+                if (dq[ltype].empty()) {
+                    min_price[ltype] = LLONG_MAX;
+                }
+                else {
+                    min_price[ltype] = dq[ltype].front().second;
+                }
+            }
+            left++;
+        }
+
+        // Проверяем, есть ли в окне по одному предмету каждого типа
+        if (min_price[0] != LLONG_MAX && min_price[1] != LLONG_MAX && min_price[2] != LLONG_MAX) {
+            ll total_price = min_price[0] + min_price[1] + min_price[2];
+            if (total_price <= X) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+
+    ll N, X;
+    cin >> N >> X;
+
+    vector<Item> events;
+    events.reserve(3 * N);
+
+    // Ввод диванов
+    for (int i = 0; i < N; i++) {
+        ll color;
+        cin >> color;
+        events.push_back({ color, 0, 0 }); // Тип 0 - диван
+    }
+    for (int i = 0; i < N; i++) {
+        cin >> events[i].price;
+    }
+
+    // Ввод столов
+    int offset = N;
+    for (int i = 0; i < N; i++) {
+        ll color;
+        cin >> color;
+        events.push_back({ color, 0, 1 }); // Тип 1 - стол
+    }
+    for (int i = 0; i < N; i++) {
+        cin >> events[offset + i].price;
+    }
+
+    // Ввод обшивок
+    offset = 2 * N;
+    for (int i = 0; i < N; i++) {
+        ll color;
+        cin >> color;
+        events.push_back({ color, 0, 2 }); // Тип 2 - обшивка
+    }
+    for (int i = 0; i < N; i++) {
+        cin >> events[offset + i].price;
+    }
+
+    // Сортируем все события по цвету
+    sort(events.begin(), events.end(), [&](const Item& a, const Item& b) {
+        return a.color < b.color;
+        });
+
+    // Находим минимальный и максимальный цвет
+    ll min_color = events.front().color;
+    ll max_color = events.back().color;
+
+    // Бинарный поиск по возможной разности цветов
+    ll left = 0, right = max_color - min_color;
+    ll answer = -1;
+    while (left <= right) {
+        ll mid = left + (right - left) / 2;
+        if (is_possible(mid, events, X)) {
+            answer = mid;
+            right = mid - 1;
+        }
+        else {
+            left = mid + 1;
+        }
+    }
+    cout << answer;
+    return 0;
+}
